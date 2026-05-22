@@ -1,0 +1,1 @@
+{"name":"identity-service","version":"1.0.0","devDependencies":{"prisma":"^6.2.1"},"dependencies":{"@prisma/client":"^6.2.1"}}
