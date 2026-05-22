@@ -1,0 +1,37 @@
+// trip-matching-service/prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TripStatus {
+  SEARCHING
+  MATCHED
+  ARRIVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Trip {
+  id                 String     @id @default(uuid())
+  passengerId        String     // UUID puro, sem relation
+  driverId           String?    // UUID puro, sem relation
+  status             TripStatus @default(SEARCHING)
+  originLat          Float
+  originLng          Float
+  originAddress      String
+  destinationLat     Float
+  destinationLng     Float
+  destinationAddress String
+  price              Float
+  distanceKm         Float
+  durationMin        Int
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+}

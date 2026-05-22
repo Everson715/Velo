@@ -1,0 +1,21 @@
+// review-rating-service/prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  tripId      String   @unique
+  reviewerId  String
+  receiverId  String
+  rating      Int
+  comment     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
