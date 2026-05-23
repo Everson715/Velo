@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Telemetry {
+  id        String   @id @default(uuid())
+  tripId    String   // ID da corrida vindo do trip-matching-service
+  latitude  Float
+  longitude Float
+  timestamp DateTime @default(now())
+
+  // Criamos um índice no tripId para que as consultas de "histórico da corrida" 
+  // sejam instantâneas, mesmo com milhões de linhas na tabela.
+  @@index([tripId])
+}
