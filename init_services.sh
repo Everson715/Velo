@@ -42,6 +42,17 @@ for SERVICE in "${SERVICES[@]}"; do
     mkdir -p app/Services
     mkdir -p app/Http/Middleware
     
+    # Copia o Dockerfile template
+    cp "$BASE_DIR/Dockerfile.template" "Dockerfile"
+    
+    # Copia o script de check de conectividade
+    cp "$BASE_DIR/check_connectivity.php" "check_connectivity.php"
+    
+    # Ajusta permissoes
+    if [ -d "storage" ] && [ -d "bootstrap/cache" ]; then
+        chmod -R 775 storage bootstrap/cache
+    fi
+    
     # Retorna para a raiz do Monorepo
     cd "$BASE_DIR"
 done
