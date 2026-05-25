@@ -7,9 +7,11 @@
         "dev": "vite"
     },
     "devDependencies": {
+        "@prisma/adapter-pg": "^7.8.0",
         "@tailwindcss/vite": "^4.0.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",
+        "pg": "^8.21.0",
         "prisma": "^7.8.0",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
