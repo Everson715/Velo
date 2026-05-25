@@ -1,4 +1,4 @@
-import { defineConfig } from "prisma/config";
+import { defineConfig, env } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -6,7 +6,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Trocado 'velo-postgres' por '127.0.0.1' para a sua máquina física alcançar o banco mapeado
-    url: "postgresql://postgres:postgres@127.0.0.1:5432/velo_identity?schema=public",
+    // O método env() do Prisma busca no arquivo .env sem disparar erros no TypeScript
+    url: env("DATABASE_URL") || "postgresql://postgres:postgres@velo-postgres:5432/velo_identity?schema=public",
   },
 });
