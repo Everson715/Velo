@@ -12,14 +12,26 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
+                // Altera de $table->id() para uuid e define como chave primária
+                $table->uuid('id')->primary();
+
+                $table->string('name');
+                $table->string('email')->unique();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password');
+
+                // Novas colunas exigidas pelo Model e pelas regras de negócio:
+                $table->string('phone')->nullable(); // mude para obrigatório se necessário
+                $table->boolean('isOnline')->default(false);
+                $table->boolean('documentsApproved')->default(false);
+                $table->float('rating')->default(5.0);
+
+                $table->rememberToken();
+                $table->timestamps();
+                $table->softDeletes(); // Necessário porque você usa 'use SoftDeletes' no Model
+
+                $table->string('role')->default('PASSENGER');
+            });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -28,7 +40,7 @@ return new class extends Migration
         });
 
         Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->uuid('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
