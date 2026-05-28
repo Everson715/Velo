@@ -63,4 +63,22 @@ class AuthController extends Controller
         // Placeholder logic
         return response()->json(['status' => 'success', 'message' => 'Password reset successfully']);
     }
+
+    public function refresh(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        // Revoke current token
+        $user->currentAccessToken()->delete();
+        
+        // Issue new token
+        $token = $user->createToken('auth_token')->plainTextToken;
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'token' => $token,
+            ],
+        ]);
+    }
 }

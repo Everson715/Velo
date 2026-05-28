@@ -30,6 +30,8 @@ class MeController extends Controller
     public function update(UpdateProfileRequest $request): JsonResponse
     {
         $user = $request->user();
+        \Illuminate\Support\Facades\Gate::authorize('update', $user);
+        
         $user->update($request->validated());
 
         return response()->json([
@@ -57,6 +59,7 @@ class MeController extends Controller
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
         $user = $request->user();
+        \Illuminate\Support\Facades\Gate::authorize('update', $user);
         
         $user->update([
             'password' => Hash::make($request->password),
@@ -89,6 +92,7 @@ class MeController extends Controller
     public function deleteAccount(Request $request): JsonResponse
     {
         $user = $request->user();
+        \Illuminate\Support\Facades\Gate::authorize('delete', $user);
         
         // Revoke all tokens
         $user->tokens()->delete();

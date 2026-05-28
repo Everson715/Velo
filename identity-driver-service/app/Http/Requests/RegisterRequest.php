@@ -23,10 +23,19 @@ class RegisterRequest extends FormRequest
      */
     public function rules(): array
     {
+        $passwordRules = \Illuminate\Validation\Rules\Password::min(8)
+            ->mixedCase()
+            ->numbers()
+            ->symbols();
+
+        if (app()->environment('production')) {
+            $passwordRules->uncompromised();
+        }
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', $passwordRules],
             'role' => ['sometimes', 'string', 'in:PASSENGER,DRIVER,ADMIN'],
             'phone' => ['nullable', 'string', 'max:20'],
         ];

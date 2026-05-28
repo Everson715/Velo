@@ -23,9 +23,18 @@ class ChangePasswordRequest extends FormRequest
      */
     public function rules(): array
     {
+        $passwordRules = \Illuminate\Validation\Rules\Password::min(8)
+            ->mixedCase()
+            ->numbers()
+            ->symbols();
+
+        if (app()->environment('production')) {
+            $passwordRules->uncompromised();
+        }
+
         return [
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', $passwordRules],
         ];
     }
 }

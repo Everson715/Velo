@@ -17,6 +17,8 @@ O microsserviço foi desenhado para manter um baixo acoplamento e alta coesão, 
 - **Models (`app/Models`)**: Modelos `User` e `Vehicle` configurados para suportar UUIDs gerados pelo Prisma e relacionamentos do Eloquent. O `User` utiliza Traits do Sanctum (`HasApiTokens`) e `SoftDeletes`.
 - **FormRequests (`app/Http/Requests`)**: Validação estrita de entradas HTTP fora dos controladores, garantindo segurança (ex: `RegisterRequest`, `LoginRequest`).
 - **Controllers (`app/Http/Controllers`)**: Lógica de entrada e saída HTTP padronizada em JSON.
+- **Policies (`app/Policies`)**: Centralização das regras de autorização para proteção contra Privilege Escalation e IDOR. Utilizadas juntamente com a facade `Gate`.
+- **Middlewares (`app/Http/Middleware`)**: Interceptação de requisições, incluindo o `AuditLoggerMiddleware` para gravação de logs de auditoria de operações críticas.
 
 ## 🔌 Endpoints da API
 
@@ -61,8 +63,26 @@ Este projeto foi projetado para rodar nativamente via Docker.
    ```
 3. O servidor backend da API estará ouvindo na porta configurada pelo container Docker (geralmente porta 8001 para o serviço de identidade).
 
+## 🧪 Testes Automatizados
+
+A aplicação conta com uma robusta suíte de testes de integração (Feature Tests) construída utilizando o PHPUnit com integração nativa ao Laravel e Sanctum.
+
+Para rodar os testes isolados e garantir o funcionamento das regras de negócio, utilize o comando dentro do container principal (o banco em memória local `:velo_identity_test` será utilizado automaticamente):
+
+```bash
+docker exec -it velo-php-identity php artisan test
+```
+
+A cobertura (100% Passing) engloba:
+- **Cadastro**: Emissão correta de respostas de erro para campos nulos e e-mails duplicados, e assertividade de banco de dados para os UUIDs.
+- **Autenticação**: Emissão e revogação do Token Sanctum para Logins e Logouts de sistema.
+- **Gestão de Sessões**: Bloqueio ativo de tokens antigos no DB e Soft Delete (Ocultação).
+
 ## 🔒 Segurança
 
-- As senhas são processadas pela fachada `Hash` do Laravel (Bcrypt/Argon).
-- Requisições protegidas operam sob o middleware `auth:sanctum`.
+- As senhas são processadas pela fachada `Hash` do Laravel (Bcrypt/Argon) e possuem regras fortes (mínimo de 8 caracteres, maiúsculas, minúsculas, números e símbolos). Em produção, as senhas são validadas contra vazamentos (`uncompromised`).
+- Requisições protegidas operam sob o middleware `auth:sanctum`, com tokens configurados para expirarem em 2 horas. Há também rotas de `/refresh` para a rotação de tokens.
+- Proteção contra tentativas de Força Bruta através de Rate Limiting (ex: 5 tentativas por minuto no `/login`, 3 no `/register`).
+- Ações críticas que modificam o estado (POST, PUT, PATCH, DELETE) são registradas no banco de dados (`AuditLog`), rastreando `user_id`, endereço IP e ação.
+- A autorização foi reforçada utilizando `Laravel Policies` (ex: `UserPolicy`) e `Gates` nos controllers para evitar vulnerabilidades de IDOR e escalonamento indevido de privilégios.
 - Dados apagados não são removidos do banco (`SoftDeletes`), sendo apenas ocultados por questões de compliance.
