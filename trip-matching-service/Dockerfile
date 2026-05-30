@@ -1,12 +1,17 @@
-FROM php:8.3-fpm
+FROM node:20-alpine
 
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    zip \
-    unzip \
-    && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-install pdo_pgsql
+WORKDIR /usr/src/app
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY package*.json ./
+COPY prisma ./prisma/
 
-WORKDIR /var/www/html
+RUN npm install
+
+COPY . .
+
+RUN npx prisma generate
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:prod"]

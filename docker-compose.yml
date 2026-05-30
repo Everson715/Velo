@@ -37,20 +37,21 @@ services:
     build:
       context: ./trip-matching-service
       dockerfile: Dockerfile
-    container_name: velo-php-trips
+    container_name: velo-node-trips
+    image: velo-node-trips
+    entrypoint: []
     ports:
-      - "8002:8000"
+      - "8002:3000"
     environment:
-      - DB_HOST=velo-postgres
-      - DB_PORT=5432
-      - DB_DATABASE=velo_trips
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-postgres}@velo-postgres:5432/velo_trips?schema=public
     volumes:
-      - ./trip-matching-service:/var/www/html
-    command: php artisan serve --host=0.0.0.0 --port=8000
+      - ./trip-matching-service:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "npx prisma migrate deploy && npm run start:prod"
     networks:
       - velo_network
+    depends_on:
+      - velo-postgres
 
   review-rating:
     build:

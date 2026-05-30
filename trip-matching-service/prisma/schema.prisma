@@ -16,13 +16,21 @@ enum TripStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+  EXPIRED // Adicionado para cobrir o estado de timeout na busca
+}
+
+enum AttemptStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }
 
 model Trip {
-  id                 String     @id @default(uuid())
-  passengerId        String     // UUID puro, sem relation
-  driverId           String?    // UUID puro, sem relation
-  status             TripStatus @default(SEARCHING)
+  id                 String         @id @default(uuid())
+  passengerId        String         // UUID vindo do identity-service
+  driverId           String?        // UUID vindo do identity-service (preenchido no MATCHED)
+  status             TripStatus     @default(SEARCHING)
   originLat          Float
   originLng          Float
   originAddress      String
@@ -32,6 +40,26 @@ model Trip {
   price              Float
   distanceKm         Float
   durationMin        Int
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  
+  // Relacionamento local para rastrear as ofertas enviadas aos motoristas
+  matchAttempts      MatchAttempt[]
+
+  @@map("trips") // Boa prática para manter tabelas em caixa baixa no Postgres
+}
+
+model MatchAttempt {
+  id        String        @id @default(uuid())
+  tripId    String
+  driverId  String        // UUID do motorista que recebeu a oferta
+  status    AttemptStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relação interna dentro do próprio microsserviço
+  trip      Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, driverId]) // Impede que o mesmo motorista receba a mesma oferta duplicada
+  @@map("match_attempts")
 }
