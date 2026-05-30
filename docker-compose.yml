@@ -47,7 +47,7 @@ services:
     volumes:
       - ./trip-matching-service:/usr/src/app
       - /usr/src/app/node_modules
-    command: sh -c "npx prisma migrate deploy && npm run start:prod"
+    command: sh -c "npx prisma migrate deploy && npm run build &&npm run start:prod"
     networks:
       - velo_network
     depends_on:
