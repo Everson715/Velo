@@ -1,9 +1,23 @@
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import { useEffect } from 'react';
+import * as SecureStore from 'expo-secure-store';
 
 export default function HomeScreen() {
   const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await SecureStore.getItemAsync('user_token');
+      
+      if (!token) {
+        router.replace('/login');
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,7 +83,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   primaryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#333333',
     paddingVertical: 18,
     borderRadius: 12,
     alignItems: 'center',
